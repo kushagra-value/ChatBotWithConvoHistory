@@ -3,8 +3,8 @@ from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 
-## Prompt Template
-prompt=ChatPromptTemplate.from_messages(
+# Prompt Template
+prompt = ChatPromptTemplate.from_messages(
     [
         ("system", "You are a helpful assistant. Please respond to the user queries."),
         ("user", "Question:{question}")
@@ -12,27 +12,35 @@ prompt=ChatPromptTemplate.from_messages(
 )
 
 def generate_response(question, api_key, engine, temperature, max_tokens):
-    llm = ChatOpenAI(model=engine, temperature=temperature, max_tokens=max_tokens, openai_api_key=api_key)
-    output_parser = StrOutputParser()
-    chain = prompt | llm | output_parser
-    answer = chain.invoke({'question': question})
-    return answer
+    try:
+        # Create a new instance of ChatOpenAI for each request
+        llm = ChatOpenAI(model=engine, temperature=temperature, max_tokens=max_tokens, openai_api_key=api_key)
+        output_parser = StrOutputParser()
+        chain = prompt | llm | output_parser
+        answer = chain.invoke({'question': question})
+        return answer
+    except Exception as e:
+        error_message = str(e)
+        if "Error code: 401" in error_message and "invalid_api_key" in error_message:
+            return "Invalid API Key. Please check your API Key and try again."
+        else:
+            return f"An error occurred: {error_message}"
 
-## Title of the app
+# Title of the app
 st.title("Enhanced Q&A Chatbot With OpenAI")
 
-## Sidebar for settings
+# Sidebar for settings
 st.sidebar.title("Settings")
 api_key = st.sidebar.text_input("Enter your OpenAI API Key:", type="password")
 
-## Select the OpenAI model
+# Select the OpenAI model
 engine = st.sidebar.selectbox("Select OpenAI model", ["gpt-3.5-turbo"])
 
-## Adjust response parameters
+# Adjust response parameters
 temperature = st.sidebar.slider("Temperature", min_value=0.0, max_value=1.0, value=0.7)
 max_tokens = st.sidebar.slider("Max Tokens", min_value=50, max_value=300, value=150)
 
-## Main interface for user input
+# Main interface for user input
 st.write("Go ahead and ask any question")
 user_input = st.text_input("You:")
 
