@@ -4,7 +4,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 
 ## Prompt Template
-prompt = ChatPromptTemplate.from_messages(
+prompt=ChatPromptTemplate.from_messages(
     [
         ("system", "You are a helpful assistant. Please respond to the user queries."),
         ("user", "Question:{question}")
@@ -12,18 +12,11 @@ prompt = ChatPromptTemplate.from_messages(
 )
 
 def generate_response(question, api_key, engine, temperature, max_tokens):
-    try:
-        llm = ChatOpenAI(model=engine, temperature=temperature, max_tokens=max_tokens, openai_api_key=api_key)
-        output_parser = StrOutputParser()
-        chain = prompt | llm | output_parser
-        answer = chain.invoke({'question': question})
-        return answer
-    except Exception as e:
-        error_message = str(e)
-        if "Error code: 401" in error_message and "invalid_api_key" in error_message:
-            return "Invalid API Key. Please check your API Key and try again."
-        else:
-            return f"An error occurred: {error_message}"
+    llm = ChatOpenAI(model=engine, temperature=temperature, max_tokens=max_tokens, openai_api_key=api_key)
+    output_parser = StrOutputParser()
+    chain = prompt | llm | output_parser
+    answer = chain.invoke({'question': question})
+    return answer
 
 ## Title of the app
 st.title("Enhanced Q&A Chatbot With OpenAI")
